@@ -1,0 +1,23 @@
+import MsignController from '@/controllers/msign.controller';
+import { Router } from 'express';
+import { Routes } from '@interfaces/routes.interface';
+
+class MsignRoute implements Routes {
+  public path = '/msign';
+  public router = Router();
+  public msignController = new MsignController();
+
+  constructor() {
+    this.initializeRoutes();
+  }
+
+  private initializeRoutes() {
+    this.router.get(`${this.path}/status/:id`, this.msignController.getStatus);
+
+    this.router.get(`${this.path}/sign`, this.msignController.signRequest);
+    this.router.post(`${this.path}/verifysign`, this.msignController.verifyRequest);
+    this.router.post(`${this.path}/getFile`, this.msignController.getFile);
+  }
+}
+
+export default MsignRoute;
