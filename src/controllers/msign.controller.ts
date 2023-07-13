@@ -2,8 +2,8 @@ import axios from 'axios';
 import { MSING_API } from '@config';
 import { NextFunction, Request, Response } from 'express';
 import AppController from '@controllers/app.controller';
-import { pdfBuffer } from '@config';
-import { TSignRequest } from '@interfaces/msign';
+import { pdfBuffer, pdfBufferSigned } from '@config';
+import { TSignRequest, TGetSignResponse, TVerifySignRequst } from '@interfaces/msign';
 class MsignController extends AppController {
   public signRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -13,6 +13,9 @@ class MsignController extends AppController {
         ContentType: 'Pdf',
         Contents: {
           SignContent: [
+            {
+              Content: Buffer.from(pdfBuffer).toString('base64'),
+            },
             {
               Content: Buffer.from(pdfBuffer).toString('base64'),
             },
@@ -34,7 +37,14 @@ class MsignController extends AppController {
   };
   public verifyRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { request } = req.body;
+      const { a } = req.body;
+
+      const request: TVerifySignRequst = {
+        Contents: {
+          VerificationContent: [{ Signature: Buffer.from(pdfBufferSigned).toString('base64') }],
+        },
+        SignedContentType: 'Pdf',
+      };
 
       const { VerifySignaturesResult } = await this.msignService.verifySignRequest(request);
 
@@ -52,15 +62,16 @@ class MsignController extends AppController {
     try {
       const { id } = req.params;
 
-      const request = {
+      const request: TGetSignResponse = {
         requestID: id,
       };
 
-      const { Status } = await this.msignService.getSignRequest(request);
+      const { GetSignResponseResult } = await this.msignService.getSignRequest(request);
+      console.log(GetSignResponseResult);
 
       return res.status(200).json({
         success: true,
-        payload: Status,
+        payload: GetSignResponseResult,
         message: 'OK',
       });
     } catch (error) {

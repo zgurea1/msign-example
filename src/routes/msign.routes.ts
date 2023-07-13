@@ -13,9 +13,8 @@ class MsignRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/status/:id`, this.msignController.getStatus);
-
     this.router.get(`${this.path}/sign`, this.msignController.signRequest);
-    this.router.post(`${this.path}/verifysign`, this.msignController.verifyRequest);
+    this.router.get(`${this.path}/verifysign`, this.msignController.verifyRequest);
     this.router.post(`${this.path}/getFile`, this.msignController.getFile);
   }
 }
