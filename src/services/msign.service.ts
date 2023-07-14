@@ -1,17 +1,9 @@
-import { createClientAsync, ClientSSLSecurity } from 'soap';
+import { createClientAsync, ClientSSLSecurity, Client } from 'soap';
 import { HttpException } from '@exceptions/HttpException';
 import { pkiCert, privateKey, WSDL_URL } from '@config';
 import { isEmpty } from '@utils/util';
 import https from 'https';
-import {
-  TClient,
-  TSignRequest,
-  TSignResponse,
-  TGetSignResponse,
-  TGetSignResponseResult,
-  TVerifySignResponse,
-  TVerifySignRequst,
-} from '@interfaces/msign';
+import { TSignRequest, TSignResponse, TGetSignRequest, TGetSignResponse, TVerifySignResponse, TVerifySignRequst } from '@interfaces/msign';
 class MsignService {
   private pkiCert = pkiCert;
   private privateKey = privateKey;
@@ -25,7 +17,7 @@ class MsignService {
    * @returns {Promise<Client>}
    */
 
-  private async createSecureSoapClient(): Promise<any> {
+  private async createSecureSoapClient(): Promise<Client> {
     try {
       const client = await createClientAsync(WSDL_URL, {
         wsdl_options: {
@@ -37,12 +29,7 @@ class MsignService {
         },
       });
 
-      const description = client.describe();
-      // console.log(description.MSignService.BasicHttpBinding_IMSign.VerifySignatures.input.request.Contents);
-
-      // console.log(description.MSignService.BasicHttpBinding_IMSign.GetSignResponse);
-      // console.log(description.MSignService.BasicHttpBinding_IMSign.VerifySignatures.input.request.Contents);
-      // console.log(description.MSignService.BasicHttpBinding_IMSign.PostSignRequest.input.request);
+      // const description = client.describe();
       client.setSecurity(new ClientSSLSecurity(this.privateKey, this.pkiCert, {}));
 
       return client;
@@ -52,17 +39,17 @@ class MsignService {
   }
 
   /**
-   * Create request to imsign to sign pdf or hash content
+   * Create request to msign to sign pdf or hash content
    * @param {Object} request : Request object for sign input (see schema validation)
    * @returns {Promise}
    */
-  public async postSignRequest({ request }: TSignRequest): Promise<TSignResponse> {
+  public async postSignRequest(request: TSignRequest): Promise<TSignResponse> {
     try {
-      if (isEmpty(request)) throw new HttpException(400, 'request is empty');
+      if (isEmpty(request)) throw new HttpException(400, 'Request is empty');
 
-      const client: TClient = await this.createSecureSoapClient();
+      const client = await this.createSecureSoapClient();
 
-      const result = await client.PostSignRequestAsync({ request });
+      const [result] = await client.PostSignRequestAsync({ request });
 
       return result;
     } catch (error) {
@@ -76,16 +63,16 @@ class MsignService {
    * @param {Object} request : Request object to get status of sign (see schema validation)
    * @returns {Promise}
    */
-  public async getSignRequest(request: TGetSignResponse): Promise<TGetSignResponseResult> {
+  public async getSignRequest(request: TGetSignRequest): Promise<TGetSignResponse> {
     try {
-      if (isEmpty(request)) throw new HttpException(400, 'request is empty');
+      if (isEmpty(request)) throw new HttpException(400, 'Request is empty');
       const client = await this.createSecureSoapClient();
 
-      const result: TGetSignResponseResult[] = await client.GetSignResponseAsync(request);
+      const [result] = await client.GetSignResponseAsync(request);
 
-      return result[0];
+      return result;
     } catch (error) {
-      throw new HttpException(400, 'An error has occurred signing status method');
+      throw new HttpException(400, 'An error has occurred signing method');
     }
   }
 
@@ -96,13 +83,13 @@ class MsignService {
    */
   public async verifySignRequest(request: TVerifySignRequst): Promise<TVerifySignResponse> {
     try {
-      if (isEmpty(request)) throw new HttpException(400, 'request is empty');
+      if (isEmpty(request)) throw new HttpException(400, 'Request is empty');
 
       const client = await this.createSecureSoapClient();
 
-      const result: TVerifySignResponse[] = await client.VerifySignaturesAsync({ request });
+      const [result] = await client.VerifySignaturesAsync({ request });
 
-      return result[0];
+      return result;
     } catch (error) {
       throw new HttpException(400, 'An error has occurred verify singing method');
     }

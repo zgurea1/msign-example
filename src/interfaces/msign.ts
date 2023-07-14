@@ -7,23 +7,21 @@ type Contents = {
 };
 
 export type TSignRequest = {
-  request: {
-    ContentType: string | 'pdf' | 'xml';
-    Contents: Contents;
-    ShortContentDescription: string | 'Cerere';
-  };
+  ContentType: string | 'pdf' | 'xml';
+  Contents: Contents;
+  ShortContentDescription: string | 'Cerere';
 };
 
 export type TSignResponse = {
   PostSignRequestResult: string;
 };
 
-export type TGetSignResponse = {
+export type TGetSignRequest = {
   requestID: string;
   language?: string | 'ro';
 };
 
-export type TGetSignResponseResult = {
+export type TGetSignResponse = {
   GetSignResponseResult: {
     Results: {
       SignResult: string[];
@@ -74,10 +72,4 @@ type VerificationCertificate = {
   SignatureValid: boolean;
   SignedAt: Date;
   Subject: string;
-};
-
-export type TClient = {
-  PostSignRequestAsync(request: TSignRequest): TSignResponse;
-  GetSignResponseAsync(request: TGetSignResponse): TGetSignResponseResult;
-  VerifySignaturesAsync(request: TVerifySignRequst): TVerifySignResponse;
 };

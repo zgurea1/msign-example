@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { type CorsOptions } from 'cors';
 config({ path: `.env.${process.env.NODE_ENV || 'development'}.local` });
 
 export const privateKey = readFileSync(join(__dirname, '/cert/key.pem'));
@@ -11,12 +12,14 @@ export const pdfBufferSigned = readFileSync(join(__dirname, '/cert/invoce-exampl
 export const CREDENTIALS = process.env.CREDENTIALS == true;
 export const { NODE_ENV, PORT, LOG_FORMAT, LOG_DIR, ORIGIN, WSDL_URL, FRONTEND_URL, MSING_API } = process.env;
 
-export const corsOptions = {
-  origin: (origin: string, callback: void) => {
-    if (ORIGIN.split(', ').indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+export const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (origin !== undefined) {
+      if (ORIGIN.split(', ').indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: CREDENTIALS,

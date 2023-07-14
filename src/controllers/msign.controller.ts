@@ -1,9 +1,7 @@
-import axios from 'axios';
-import { MSING_API } from '@config';
 import { NextFunction, Request, Response } from 'express';
 import AppController from '@controllers/app.controller';
 import { pdfBuffer, pdfBufferSigned } from '@config';
-import { TSignRequest, TGetSignResponse, TVerifySignRequst } from '@interfaces/msign';
+import { TSignRequest, TGetSignRequest, TVerifySignRequst } from '@interfaces/msign';
 class MsignController extends AppController {
   public signRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -35,22 +33,25 @@ class MsignController extends AppController {
       next(error);
     }
   };
+
   public verifyRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { a } = req.body;
-
       const request: TVerifySignRequst = {
         Contents: {
-          VerificationContent: [{ Signature: Buffer.from(pdfBufferSigned).toString('base64') }],
+          VerificationContent: [
+            { Signature: Buffer.from(pdfBufferSigned).toString('base64') },
+            { Signature: Buffer.from(pdfBuffer).toString('base64') },
+          ],
         },
         SignedContentType: 'Pdf',
       };
 
       const { VerifySignaturesResult } = await this.msignService.verifySignRequest(request);
+      console.log(VerifySignaturesResult);
 
       return res.status(200).json({
         success: true,
-        payload: VerifySignaturesResult,
+        payload: VerifySignaturesResult.Results.VerificationResult,
         message: 'OK',
       });
     } catch (error) {
@@ -62,42 +63,17 @@ class MsignController extends AppController {
     try {
       const { id } = req.params;
 
-      const request: TGetSignResponse = {
+      const request: TGetSignRequest = {
         requestID: id,
       };
 
       const { GetSignResponseResult } = await this.msignService.getSignRequest(request);
-      console.log(GetSignResponseResult);
 
       return res.status(200).json({
         success: true,
-        payload: GetSignResponseResult,
+        payload: GetSignResponseResult.Status,
         message: 'OK',
       });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public getFile = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.body;
-      const urlMsignUrl = `${MSING_API}/api/direct/GetContentsIDs?id=${id}`;
-
-      const { data } = await axios({
-        method: 'GET',
-        url: urlMsignUrl,
-      });
-
-      const fileUrl = `${MSING_API}/api/direct/GetFile?id=${data[0]}&isContent=false`;
-
-      const { data: FileData } = await axios({
-        method: 'GET',
-        url: fileUrl,
-        responseType: 'arraybuffer',
-      });
-
-      return res.status(200).send(Buffer.from(FileData, 'base64'));
     } catch (error) {
       next(error);
     }
