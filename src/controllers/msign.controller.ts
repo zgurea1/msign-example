@@ -1,12 +1,10 @@
-import { NextFunction, Request, Response } from 'express';
+import { type NextFunction, Request, Response } from 'express';
 import AppController from '@controllers/app.controller';
 import { pdfBuffer, pdfBufferSigned } from '@config';
 import { TSignRequest, TGetSignRequest, TVerifySignRequst } from '@interfaces/msign';
 class MsignController extends AppController {
   public signRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, type } = req.body;
-
       const request: TSignRequest = {
         ContentType: 'Pdf',
         Contents: {
@@ -14,12 +12,9 @@ class MsignController extends AppController {
             {
               Content: Buffer.from(pdfBuffer).toString('base64'),
             },
-            {
-              Content: Buffer.from(pdfBuffer).toString('base64'),
-            },
           ],
         },
-        ShortContentDescription: name || 'Cerere',
+        ShortContentDescription: 'Cerere',
       };
 
       const { PostSignRequestResult } = await this.msignService.postSignRequest(request);
