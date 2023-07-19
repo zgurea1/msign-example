@@ -14,12 +14,10 @@ export const { NODE_ENV, PORT, LOG_FORMAT, LOG_DIR, ORIGIN, WSDL_URL, FRONTEND_U
 
 export const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    if (origin !== undefined) {
-      if (ORIGIN.split(', ').indexOf(origin) !== -1 || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+    if (!origin || ORIGIN.split(', ').indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: CREDENTIALS,

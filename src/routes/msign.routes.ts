@@ -4,7 +4,7 @@ import { Routes } from '@interfaces/routes.interface';
 
 class MsignRoute implements Routes {
   public path = '/msign';
-  public router = Router();
+  public router: Router = Router();
   public msignController = new MsignController();
 
   constructor() {
