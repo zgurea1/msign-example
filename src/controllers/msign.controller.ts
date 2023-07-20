@@ -42,7 +42,6 @@ class MsignController extends AppController {
       };
 
       const { VerifySignaturesResult } = await this.msignService.verifySignRequest(request);
-      console.log(VerifySignaturesResult);
 
       return res.status(200).json({
         success: true,
