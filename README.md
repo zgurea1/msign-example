@@ -140,6 +140,6 @@ const [result] = await client.VerifySignaturesAsync({ request });
 
 # Shout-out
 
-<p>A great library with a good documentation saved my life - [node-soap](https://github.com/vpulim/node-soap)</p>
+<p>A great library with a good documentation saved my life - <a href="https://github.com/vpulim/node-soap" target="_blank">node-soap</a></p>
 
-<p>Big W for the instruments and services that eGov have achieved this years - [eGov official page](https://egov.md/ro) </p>
+<p>Big W for the instruments and services that eGov have achieved this years - <a href="https://egov.md/ro">eGov official page</a> </p>
